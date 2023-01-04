@@ -11,18 +11,13 @@ project.version = '2.3.0-SNAPSHOT'
 sourceCompatibility = '8'
 targetCompatibility = '8'
 
-if (!project.hasProperty("JAVA_8_HOME")) {
-    project.ext.setProperty("JAVA_8_HOME", System.getenv("JAVA_8_HOME"))
+System.getenv().each { varName, varValue ->
+    if (varName.matches('^JAVA_(\\d+)_HOME$') && !project.hasProperty(varName)) {
+        project.ext.setProperty(varName, varValue)
+    }
 }
-if (!project.hasProperty("JAVA_9_HOME")) {
-    project.ext.setProperty("JAVA_9_HOME", System.getenv("JAVA_9_HOME"))
-}
-if (!project.hasProperty("JAVA_11_HOME")) {
-    project.ext.setProperty("JAVA_11_HOME", System.getenv("JAVA_11_HOME"))
-}
-if (!project.hasProperty("JAVA_16_HOME")) {
-    project.ext.setProperty("JAVA_16_HOME", System.getenv("JAVA_16_HOME"))
-}
+
+project.properties.ext.dotExe = System.getProperty("os.name").toLowerCase().contains("windows") ? ".exe" : ""
 
 buildscript {
     repositories {
@@ -34,7 +29,7 @@ buildscript {
 
 compileJava {
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
+    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac${dotExe}"
 }
 
 repositories {
@@ -54,7 +49,7 @@ String mavenArtifactId = name
 
 javadoc {
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
-    executable = "${JAVA_8_HOME}/bin/javadoc"
+    executable = "${project.property('JAVA_8_HOME')}/bin/javadoc"
     failOnError true
 }
 

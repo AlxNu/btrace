@@ -23,7 +23,7 @@ compileJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac"
+    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac${dotExe}"
 }
 
 processResources {

@@ -51,7 +51,7 @@ jmh {
   warmupIterations = 5
   iterations = 10
   fork = 2
-  jvm = "${env['JAVA_HOME']}/bin/java"
+  jvm = "${env['JAVA_HOME']}/bin/java${dotExe}"
   duplicateClassesStrategy = DuplicatesStrategy.WARN
   def agent = "-javaagent:${project.buildDir}/../../../btrace-dist/build/resources/main/${project.version}/libs/btrace-agent.jar=stdout=true,noServer=true,debug=true,script=${project.buildDir}/classes/java/main/TraceScript.btclass"
   println(agent)

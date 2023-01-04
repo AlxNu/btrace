@@ -23,7 +23,7 @@ compileJava11_dummyJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac"
+    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac${dotExe}"
     options.forkOptions.javaHome = file("${project.property("JAVA_11_HOME")}")
 }
 
@@ -31,7 +31,7 @@ compileTestJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
+    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac${dotExe}"
 }
 
 task buildEventsJar(type: Jar) {

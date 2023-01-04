@@ -34,7 +34,7 @@ compileTestJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
+    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac${dotExe}"
 }
 
 task compileTestProbes {
@@ -44,9 +44,9 @@ task compileTestProbes {
 
         def loader = new URLClassLoader(path.collect { f -> f.toURL() } as URL[])
         def compiler = loader.loadClass('org.openjdk.btrace.compiler.Compiler')
-        def rtCp = sourceSets.main.runtimeClasspath.collect { it.absolutePath }.join(':')
-
-        def args = ["-cp", "${buildDir}/classes/java/test:${buildDir}/classes/java/java11_dummy:${rtCp}", "-d", "${buildDir}/classes"]
+        def rtCp = sourceSets.main.getRuntimeClasspath()
+ 
+        def args = ["-cp", rtCp.plus(files("${buildDir}/classes/java/test")).plus(files("${buildDir}/classes/java/java11_dummy")).getAsPath(), "-d", "${buildDir}/classes"]
 
         def files = fileTree(dir: "src/test/btrace", include: '**/*.java', exclude: 'verifier/**/*.java').findAll {
             it != null
