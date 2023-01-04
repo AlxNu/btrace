@@ -1,0 +1,80 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test-nix:
+    strategy:
+       fail-fast: false
+       matrix:
+         os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Java setup
+        uses: actions/setup-java@v3
+        with:
+            distribution: temurin
+            java-version: 11
+
+      - name: Cache JDKs
+        id: cache-nix-jdks
+        uses: actions/cache@v3
+        with:
+          path: ~/.sdkman/candidates
+          key: ${{ runner.os }}-jdks
+
+      - name: Preparing with config_build
+        run:  chmod +x gradlew config_build.sh && ./config_build.sh
+
+      - name: Testing with Gradlew
+        run:  source .java.versions && ./gradlew test --no-daemon
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Btrace tests - ${{ runner.os }}
+          path: "**/TEST-*.xml"
+          reporter: java-junit
+
+  test-win:
+    strategy:
+       fail-fast: false
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Java setup
+        uses: actions/setup-java@v3
+        with:
+            distribution: temurin
+            java-version: 11
+
+      - name: Cache JDKs
+        id: cache-win-jdks
+        uses: actions/cache@v3
+        with:
+          path: $HOME/.gradle/caches/jdks/**
+          key: ${{ runner.os }}-jdks
+
+      - name: Preparing with config_build
+        shell: pwsh
+        run:  .\config_build.ps1
+
+      - name: Testing with Gradlew
+        shell: pwsh
+        run:  .\config_build.ps1 && .\gradlew test --no-daemon
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Btrace tests - ${{ runner.os }}
+          path: "**/TEST-*.xml"
+          reporter: java-junit

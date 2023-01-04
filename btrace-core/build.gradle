@@ -1,3 +1,4 @@
+import java.nio.file.Paths
 import org.apache.tools.ant.filters.*
 
 plugins {
@@ -23,7 +24,8 @@ compileJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac${dotExe}"
+    options.forkOptions.executable = "${System.getenv('JAVA_HOME')}/bin/javac${dotExe}"
+    options.bootstrapClasspath = files("${project.property('JAVA_8_HOME')}/jre/lib/rt.jar").plus(files("${project.property('JAVA_8_HOME')}/jre/lib/jfr.jar"))
 }
 
 processResources {

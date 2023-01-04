@@ -1,3 +1,5 @@
+import java.nio.file.Paths
+
 sourceSets {
 
     java9 {
@@ -21,15 +23,16 @@ compileJava {
     sourceCompatibility = 8
     targetCompatibility = 8
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac${dotExe}"
+    options.forkOptions.executable = "${System.getenv('JAVA_HOME')}/bin/javac${dotExe}"
+    options.bootstrapClasspath = files("${project.property('JAVA_8_HOME')}/jre/lib/rt.jar").plus(files("${project.property('JAVA_8_HOME')}/jre/lib/jfr.jar"))
 }
 
 compileJava9Java {
     sourceCompatibility = 9
     targetCompatibility = 9
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac${dotExe}"
-    options.forkOptions.javaHome = file("${project.property("JAVA_11_HOME")}")
+    options.forkOptions.executable = "${System.getenv('JAVA_HOME')}/bin/javac${dotExe}"
+    options.forkOptions.javaHome = file("${project.property('JAVA_11_HOME')}")
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 
@@ -37,8 +40,8 @@ compileJava11Java {
     sourceCompatibility = 11
     targetCompatibility = 11
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac${dotExe}"
-    options.forkOptions.javaHome = file("${project.property("JAVA_11_HOME")}")
+    options.forkOptions.executable = "${System.getenv('JAVA_HOME')}/bin/javac${dotExe}"
+    options.forkOptions.javaHome = file("${project.property('JAVA_11_HOME')}")
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 
@@ -46,8 +49,9 @@ compileJava15Java {
     sourceCompatibility = 11
     targetCompatibility = 11
     options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_17_HOME")}/bin/javac${dotExe}"
-    options.forkOptions.javaHome = file("${project.property("JAVA_17_HOME")}")
+    options.forkOptions.executable = "${System.getenv('JAVA_HOME')}/bin/javac${dotExe}"
+    options.forkOptions.javaHome = file("${project.property('JAVA_17_HOME')}")
+//	options.bootstrapClasspath = fileTree(dir: Paths.get(project.property('JAVA_17_HOME'), "jre/lib"), include: '**/*.jar')
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 

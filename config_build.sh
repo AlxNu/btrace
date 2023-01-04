@@ -16,7 +16,7 @@ JAVA_8_VERSION="8.0.352-tem"
 JAVA_11_VERSION="11.0.17-tem"
 JAVA_17_VERSION="17.0.5-tem"
 JAVA_19_VERSION="19.0.1-tem"
-JAVA_20_VERSION="20.ea.4-open"
+JAVA_20_VERSION="20.ea.29-open"
 
 echo "Using SDKMAN version: ${SDKMAN_VER}"
 
