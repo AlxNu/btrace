@@ -274,7 +274,7 @@ test {
         title = "btrace-${name}"
         source = sourceSets.main.allJava
         destinationDir = file("${project.docsDir}/${name}/javadoc")
-        classpath = files(compileJava.destinationDir) + configurations.artifact.asFileTree
+        classpath = files(compileJava.destinationDirectory) + configurations.artifact.asFileTree
         exclude excludes["${name}"]
         options.addStringOption('Xdoclint:all,-missing', '-quiet')
         failOnError false
