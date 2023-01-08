@@ -12,18 +12,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+        uses: gradle/wrapper-validation-action@v1
 
-      - name: Setup Gradle
+      - name: Test with Gradle
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: :btrace-dist:build
+          arguments: build test
 
-      - name: Setup Gradle
+      - name: Report toolchains origins
         uses: gradle/gradle-build-action@v2
+        if: success() || failure()
         with:
-          arguments: check
+          arguments: -q javaToolchains
 
       - name: Test Report
         uses: dorny/test-reporter@v1

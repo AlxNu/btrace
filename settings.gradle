@@ -1,3 +1,7 @@
+plugins {
+  id "org.gradle.toolchains.foojay-resolver" version "0.4.0"
+}
+
 rootProject.name = 'btrace-ng'
 
 // Find the directories containing a "build.gradle" file in the root directory
@@ -24,3 +28,12 @@ subDirs.each { File dir ->
     include "benchmarks:runtime-benchmarks"
 }
 
+toolchainManagement {
+    jvm { 
+        javaRepositories {
+            repository("foojay") {
+                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver)
+            }
+        }
+    }
+}
