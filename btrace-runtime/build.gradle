@@ -18,23 +18,23 @@ sourceSets {
 }
 
 compileJava9Java {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(9)
-    }
+    sourceCompatibility = 9
+    targetCompatibility = 9
+    javaCompiler = compiler11
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 
 compileJava11Java {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
+    sourceCompatibility = 11
+    targetCompatibility = 11
+    javaCompiler = compiler11
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 
 compileJava15Java {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(15)
-    }
+    sourceCompatibility = 15
+    targetCompatibility = 15
+    javaCompiler = compiler17
     options.compilerArgs.addAll(['--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.perf=ALL-UNNAMED'])
 }
 

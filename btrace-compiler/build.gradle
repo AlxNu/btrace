@@ -3,7 +3,7 @@ dependencies {
     implementation(group: 'org.ow2.asm', name: 'asm', version: "${rootProject.asmVersion}")
     implementation(group: 'org.ow2.asm', name: 'asm-util', version: "${rootProject.asmVersion}")
 
-    implementation files("${JAVA_8_HOME}/lib/tools.jar")
+    implementation home8.get().files('lib/tools.jar')
     implementation project(path: ':btrace-core')
     implementation project(path: ':btrace-runtime')
     runtimeOnly project(path: ':btrace-instr')

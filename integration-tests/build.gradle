@@ -20,15 +20,9 @@ dependencies {
 }
 
 compileJava11_dummyJava {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(11)
-    }
-}
-
-compileTestJava {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+    sourceCompatibility = 11
+    targetCompatibility = 11
+    javaCompiler = compiler11
 }
 
 task buildEventsJar(type: Jar) {

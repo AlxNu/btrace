@@ -14,26 +14,42 @@ buildscript {
     }
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(19)
-        vendor = JvmVendorSpec.ADOPTIUM
-    }
-}
+project.ext.setProperty('compiler8', javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('home8', compiler8.map { it.metadata.installationPath })
+project.ext.setProperty('javadoctool8', javaToolchains.javadocToolFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('launcher8', javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(8))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('java8', compiler8.map { it.metadata.executablePath })
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+project.ext.setProperty('compiler11', javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(11))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('home11', compiler11.map { it.metadata.installationPath })
+
+project.ext.setProperty('compiler17', javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('home17', compiler17.map { it.metadata.installationPath })
 
 compileJava {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+    javaCompiler = compiler8
 }
 
 compileTestJava {
-    javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(8)
-    }
+    javaCompiler = compiler8
 }
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
@@ -51,6 +67,7 @@ dependencies {
 String mavenArtifactId = name
 
 javadoc {
+    javadocTool = javadoctool8
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
     failOnError true
 }
