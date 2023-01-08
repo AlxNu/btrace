@@ -1,7 +1,7 @@
 plugins {
     id 'maven-publish'
     id "com.github.johnrengelman.shadow" version "7.1.2"
-    id "nebula.ospackage" version "9.1.1"
+    id "com.netflix.nebula.ospackage" version "11.0.0"
     id "java"
     id "io.sdkman.vendors" version "3.0.0"
     id "signing"
@@ -235,19 +235,19 @@ ospackage {
     link('/usr/local/bin/btracer', '/opt/btrace/bin/btracer')
     link('/usr/local/bin/btracec', '/opt/btrace/bin/btracec')
 }
-/*
+
 buildDeb {
     requires('openjdk-8-jdk')
 }
-*/
+
 copyDtraceLib.dependsOn project(':btrace-dtrace').build
 shadowJar.dependsOn agentJar, bootJar, clientJar, copyDtraceLib
 buildTgz.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
 buildZip.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
 buildSdkmanZip.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
-//buildDeb.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
-//buildRpm.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
-build.dependsOn buildSdkmanZip, buildZip, buildTgz //, buildDeb, buildRpm
+buildDeb.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
+buildRpm.dependsOn agentJar, bootJar, clientJar, fixPermissions, copyDtraceLib, processResources
+build.dependsOn buildSdkmanZip, buildZip, buildTgz, buildDeb, buildRpm
 
 test {
     doLast {
