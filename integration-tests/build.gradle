@@ -20,18 +20,15 @@ dependencies {
 }
 
 compileJava11_dummyJava {
-    sourceCompatibility = 8
-    targetCompatibility = 8
-    options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_11_HOME")}/bin/javac"
-    options.forkOptions.javaHome = file("${project.property("JAVA_11_HOME")}")
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
 }
 
 compileTestJava {
-    sourceCompatibility = 8
-    targetCompatibility = 8
-    options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 task buildEventsJar(type: Jar) {

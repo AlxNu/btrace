@@ -5635,7 +5635,7 @@ public class InstrumentorTest extends InstrumentorTestBase {
     loadTargetClass("OnMethodTest");
     transform("TLSTest");
 
-    Files.write(FileSystems.getDefault().getPath("/tmp/TLSTest.class"), traceCode);
+    Files.write(FileSystems.getDefault().getPath(System.getProperty("java.io.tmpdir"), "TLSTest.class"), traceCode);
 
     checkTrace(
         "public static Lorg/openjdk/btrace/core/BTraceRuntime; runtime\n"
