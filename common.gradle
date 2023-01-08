@@ -8,33 +8,31 @@ apply plugin: 'idea'
 project.group = 'org.openjdk.btrace'
 project.version = '2.3.0-SNAPSHOT'
 
-sourceCompatibility = '8'
-targetCompatibility = '8'
-
-if (!project.hasProperty("JAVA_8_HOME")) {
-    project.ext.setProperty("JAVA_8_HOME", System.getenv("JAVA_8_HOME"))
-}
-if (!project.hasProperty("JAVA_9_HOME")) {
-    project.ext.setProperty("JAVA_9_HOME", System.getenv("JAVA_9_HOME"))
-}
-if (!project.hasProperty("JAVA_11_HOME")) {
-    project.ext.setProperty("JAVA_11_HOME", System.getenv("JAVA_11_HOME"))
-}
-if (!project.hasProperty("JAVA_16_HOME")) {
-    project.ext.setProperty("JAVA_16_HOME", System.getenv("JAVA_16_HOME"))
-}
-
 buildscript {
     repositories {
         mavenCentral()
     }
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+        vendor = JvmVendorSpec.ADOPTIUM
+    }
+}
+
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 compileJava {
-    options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+compileTestJava {
+    javaCompiler = javaToolchains.compilerFor {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 repositories {
@@ -54,17 +52,16 @@ String mavenArtifactId = name
 
 javadoc {
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
-    executable = "${JAVA_8_HOME}/bin/javadoc"
     failOnError true
 }
 
 task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates a jar from the source files.') {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 

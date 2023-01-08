@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Map;
@@ -55,14 +56,13 @@ import org.openjdk.btrace.core.MethodID;
 import org.openjdk.btrace.core.SharedSettings;
 import org.openjdk.btrace.runtime.BTraceRuntimeAccess;
 import org.openjdk.btrace.runtime.auxiliary.Auxiliary;
-import sun.misc.Unsafe;
 
 /** @author Jaroslav Bachorik */
 public abstract class InstrumentorTestBase {
   private static final boolean DEBUG = false;
   private static final SharedSettings settings = SharedSettings.GLOBAL;
   private static final BTraceProbeFactory factory = new BTraceProbeFactory(settings);
-  private static Unsafe unsafe;
+  private static Method realDefineClass;
   private static Field uccn = null;
 
   protected byte[] originalBC;
@@ -72,10 +72,15 @@ public abstract class InstrumentorTestBase {
 
   static {
     try {
-      Field unsafeFld = AtomicInteger.class.getDeclaredField("unsafe");
-      unsafeFld.setAccessible(true);
-      unsafe = (Unsafe) unsafeFld.get(null);
-      resetClassLoader();
+      Class<?>[] defineClassArgs = new Class<?>[] { String.class, (new byte[]{}).getClass(), int.class, int.class }; //, java.security.ProtectionDomain.class };
+      for (Method candidate : java.lang.ClassLoader.class.getDeclaredMethods()) {
+          if (candidate.getName().equals("defineClass") && java.util.Arrays.equals(candidate.getParameterTypes(), defineClassArgs) && (candidate.getReturnType() == Class.class)) {
+            realDefineClass = candidate;
+            realDefineClass.setAccessible(true);
+            break;
+          }
+        }
+        resetClassLoader();
     } catch (Exception e) {
     }
   }
@@ -142,11 +147,15 @@ public abstract class InstrumentorTestBase {
     loadClass(clzName);
   }
 
+  private static Class<?> defineClass(String className, byte[] bytecode) throws Exception {
+      return (Class<?>) realDefineClass.invoke(cl, className.replace('/', '.'), bytecode, 0, bytecode.length);
+  }
+
   @SuppressWarnings("ClassNewInstance")
   protected void loadClass(String origName) throws Exception {
     if (transformedBC != null) {
       String clzName = new ClassReader(transformedBC).getClassName().replace('.', '/');
-      Class<?> clz = unsafe.defineClass(clzName, transformedBC, 0, transformedBC.length, cl, null);
+      Class<?> clz = defineClass(clzName, transformedBC);
       try {
         clz.newInstance();
       } catch (NoSuchFieldError | NoClassDefFoundError e) {
@@ -162,7 +171,7 @@ public abstract class InstrumentorTestBase {
   protected void loadTraceCode(String origName) throws Exception {
     if (traceCode != null) {
       String traceName = new ClassReader(traceCode).getClassName().replace('.', '/');
-      Class<?> clz = unsafe.defineClass(traceName, traceCode, 0, traceCode.length, cl, null);
+      Class<?> clz = defineClass(traceName, traceCode);
       clz.newInstance();
     } else {
       System.err.println("Unable to process trace " + origName);
@@ -176,7 +185,7 @@ public abstract class InstrumentorTestBase {
       String traceName = cr.getClassName().replace('.', '/');
       Class<?> clz = null;
       try {
-        clz = unsafe.defineClass(traceName, code, 0, code.length, cl, null);
+        clz = defineClass(traceName, code);
         clz.newInstance();
       } catch (NoSuchMethodError e) {
         ClassWriter cw = new ClassWriter(0);
@@ -262,7 +271,7 @@ public abstract class InstrumentorTestBase {
     transformedBC = cw.instrument();
 
     if (transformedBC != null) {
-      try (OutputStream os = new FileOutputStream("/tmp/dummy.class")) {
+      try (OutputStream os = new FileOutputStream(new File(System.getProperty("java.io.tmpdir"), "dummy.class"))) {
         os.write(transformedBC);
       }
     } else {
@@ -356,7 +365,7 @@ public abstract class InstrumentorTestBase {
     if (DEBUG) {
       System.err.println("=== Loaded Trace: " + bcn + "\n");
       System.err.println(asmify(this.traceCode));
-      Files.write(FileSystems.getDefault().getPath("/tmp/jingle.class"), traceCode);
+      Files.write(FileSystems.getDefault().getPath(System.getProperty("java.io.tmpdir"), "jingle.class"), traceCode);
     }
 
     bcn.checkVerified();

@@ -30,13 +30,6 @@ dependencies {
     testImplementation group: 'org.ow2.asm', name: 'asm-util', version: "${rootProject.asmVersion}"
 }
 
-compileTestJava {
-    sourceCompatibility = 8
-    targetCompatibility = 8
-    options.fork = true
-    options.forkOptions.executable = "${project.property("JAVA_8_HOME")}/bin/javac"
-}
-
 task compileTestProbes {
     dependsOn compileTestJava
     doLast {
@@ -44,9 +37,9 @@ task compileTestProbes {
 
         def loader = new URLClassLoader(path.collect { f -> f.toURL() } as URL[])
         def compiler = loader.loadClass('org.openjdk.btrace.compiler.Compiler')
-        def rtCp = sourceSets.main.runtimeClasspath.collect { it.absolutePath }.join(':')
+        def rtCp = sourceSets.main.runtimeClasspath //.collect { it.absolutePath }.join(':')
 
-        def args = ["-cp", "${buildDir}/classes/java/test:${buildDir}/classes/java/java11_dummy:${rtCp}", "-d", "${buildDir}/classes"]
+        def args = ["-cp", rtCp.plus(files(buildDir.toPath().resolve("classes").resolve("java").resolve("test"), buildDir.toPath().resolve("classes").resolve("java").resolve("java11_dummy"))).getAsPath(), "-d", buildDir.toPath().resolve("classes")]
 
         def files = fileTree(dir: "src/test/btrace", include: '**/*.java', exclude: 'verifier/**/*.java').findAll {
             it != null
@@ -69,6 +62,6 @@ test {
     if (props.getProperty("JAVA_VERSION")?.contains("1.8")) {
         jvmArgs "-Dproject.version=${project.version}"
     } else {
-        jvmArgs '-XX:+IgnoreUnrecognizedVMOptions', '--add-opens', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', "-Dproject.version=${project.version}"
+        jvmArgs '-XX:+IgnoreUnrecognizedVMOptions', '--add-opens', 'java.base/java.lang =ALL-UNNAMED', '--add-opens', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', "-Dproject.version=${project.version}"
     }
 }
