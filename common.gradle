@@ -27,7 +27,7 @@ project.ext.setProperty('launcher8', javaToolchains.launcherFor {
     languageVersion.set(JavaLanguageVersion.of(8))
     vendor.set(JvmVendorSpec.ADOPTIUM)
 })
-project.ext.setProperty('java8', compiler8.map { it.metadata.executablePath })
+project.ext.setProperty('java8', launcher8.map { it.executablePath })
 
 project.ext.setProperty('compiler11', javaToolchains.compilerFor {
     languageVersion.set(JavaLanguageVersion.of(11))
