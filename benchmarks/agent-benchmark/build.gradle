@@ -6,8 +6,8 @@ plugins {
 description 'A JMH benchmark to assert the overhead imposed by various types of BTrace instrumentation.'
 
 dependencies {
-  implementation project(path: ":btrace-dist", configuration: "shadow")
-  implementation project(":btrace-compiler")
+//  implementation project(path: ":btrace-dist", configuration: "shadow")
+//  implementation project(":btrace-compiler")
   jmh project(":btrace-instr")
   jmh project(":btrace-runtime")
   jmh project(":btrace-statsd")
@@ -31,8 +31,8 @@ task btracec(type: JavaExec) {
   args 'btclass'
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
-//jmhClasses.dependsOn btracec
-compileJmhJava.dependsOn btracec
+jmhClasses.dependsOn btracec
+//compileJmhJava.dependsOn jmhClasses
 
 jmhJar {
   include 'META-INF/BenchmarkList'
@@ -53,7 +53,6 @@ jmh {
   fork = 2
   jvm = java8.get().toString()
   duplicateClassesStrategy = DuplicatesStrategy.WARN
-//  def agent = "-javaagent:${project.buildDir}/../../../btrace-dist/build/resources/main/${project.version}/libs/btrace-agent.jar=stdout=true,noServer=true,debug=true,script=${project.buildDir}/classes/java/main/TraceScript.btclass"
   def agentJar = project.buildDir.toPath().resolve('../../../btrace-dist/build/resources/main/' + project.version + '/libs/btrace-agent-' + project.version + '.jar').normalize()
   def agent = "-javaagent:${agentJar}=stdout=true,noServer=true,debug=true,script='${project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass')}"
   println(agent)

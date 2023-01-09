@@ -10,8 +10,8 @@ configurations {
 }
 
 dependencies {
-  implementation project(path: ":btrace-dist", configuration: "shadow")
-  implementation project(":btrace-compiler")
+//  implementation project(path: ":btrace-dist", configuration: "shadow")
+//  implementation project(":btrace-compiler")
   jmh project(":btrace-instr")
   jmh project(":btrace-runtime")
   jmh project(":btrace-statsd")
@@ -36,8 +36,8 @@ task btracec(type: JavaExec) {
   args 'btclass'
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
-//jmhClasses.dependsOn btracec
-compileJmhJava.dependsOn btracec
+jmhClasses.dependsOn btracec
+//compileJmhJava.dependsOn jmhClasses
 
 jmhJar {
   include 'META-INF/BenchmarkList'
