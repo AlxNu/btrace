@@ -22,7 +22,7 @@ dependencies {
 }
 
 task btracec(type: JavaExec) {
-  javaLauncher = java8
+  javaLauncher = launcher8
   group 'Build'
   inputs.files 'src/main/resources/scripts'
   outputs.dir "${buildDir}/classes/java/main"
@@ -36,7 +36,8 @@ task btracec(type: JavaExec) {
   args 'btclass'
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
-jmhClasses.dependsOn btracec
+//jmhClasses.dependsOn btracec
+compileJmhJava.dependsOn btracec
 
 jmhJar {
   include 'META-INF/BenchmarkList'
