@@ -6,6 +6,7 @@ plugins {
 description 'A JMH benchmark to assert the overhead imposed by various types of BTrace instrumentation.'
 
 dependencies {
+  implementation project(":btrace-core")
 //  implementation project(path: ":btrace-dist", configuration: "shadow")
 //  implementation project(":btrace-compiler")
   jmh project(":btrace-instr")
@@ -14,13 +15,13 @@ dependencies {
   jmh("org.openjdk.jmh:jmh-core:1.36")
   jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
 }
-configurations.implementation.canBeResolved = true
+configurations.implementation.canBeResolved = true  // TODO : Fix me !!!
 
 task btracec(type: JavaExec) {
   javaLauncher = launcher8
   group 'Build'
   inputs.files 'src/main/resources/scripts'
-  outputs.dir "${buildDir}/classes/java/main"
+  outputs.dir buildDir.toPath().resolve("classes/java/main")
 
   environment('BTRACE_HOME', "$projectDir")
   classpath configurations.implementation
@@ -32,7 +33,6 @@ task btracec(type: JavaExec) {
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
 jmhClasses.dependsOn btracec
-//compileJmhJava.dependsOn jmhClasses
 
 jmhJar {
   include 'META-INF/BenchmarkList'
@@ -54,8 +54,7 @@ jmh {
   jvm = java8.get().toString()
   duplicateClassesStrategy = DuplicatesStrategy.WARN
   def agentJar = project.buildDir.toPath().resolve('../../../btrace-dist/build/resources/main/' + project.version + '/libs/btrace-agent-' + project.version + '.jar').normalize()
-  def agent = "-javaagent:${agentJar}=stdout=true,noServer=true,debug=true,script='${project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass')}"
-  println(agent)
-  jvmArgsAppend = ["\"-Djmh.basedir=${project.buildDir}/.. -Dproject.version=${project.version} -Xmx128m ${agent.toString()}\""]
+  def agent = "-javaagent:${agentJar}=stdout=true,noServer=true,debug=true,script=${project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass')}"
+  jvmArgsAppend = ["\"-Djmh.basedir=${project.buildDir.getParent()} -Dproject.version=${project.version} -Xmx128m ${agent.toString()}\""]
   includes = ['.*BTraceBench.*']
 }

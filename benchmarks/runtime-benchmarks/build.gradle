@@ -37,7 +37,7 @@ task btracec(type: JavaExec) {
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
 jmhClasses.dependsOn btracec
-//compileJmhJava.dependsOn jmhClasses
+compileJmhJava.dependsOn btracec
 
 jmhJar {
   include 'META-INF/BenchmarkList'
