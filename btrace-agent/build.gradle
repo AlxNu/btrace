@@ -4,7 +4,7 @@ dependencies {
 
     implementation(group: 'org.ow2.asm', name: 'asm', version: "${rootProject.asmVersion}")
 
-    implementation home8.get().files('lib/tools.jar')
+    compileOnly home8.get().files('lib/tools.jar')
     implementation project(':btrace-core')
     implementation project(':btrace-services-api')
     implementation project(':btrace-runtime')

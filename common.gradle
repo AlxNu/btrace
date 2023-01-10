@@ -41,12 +41,10 @@ project.ext.setProperty('compiler17', javaToolchains.compilerFor {
 })
 project.ext.setProperty('home17', compiler17.map { it.metadata.installationPath })
 
-compileJava {
-    javaCompiler = compiler8
-}
-
-compileTestJava {
-    javaCompiler = compiler8
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'

@@ -6,9 +6,8 @@ plugins {
 description 'A JMH benchmark to assert the overhead imposed by various types of BTrace instrumentation.'
 
 dependencies {
-  implementation project(":btrace-core")
-//  implementation project(path: ":btrace-dist", configuration: "shadow")
-//  implementation project(":btrace-compiler")
+  implementation project(path: ":btrace-dist", configuration: "shadow")
+  implementation project(":btrace-compiler")
   jmh project(":btrace-instr")
   jmh project(":btrace-runtime")
   jmh project(":btrace-statsd")
@@ -16,6 +15,9 @@ dependencies {
   jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
 }
 configurations.implementation.canBeResolved = true  // TODO : Fix me !!!
+
+sourceCompatibility = '8'
+targetCompatibility = '8'
 
 task btracec(type: JavaExec) {
   javaLauncher = launcher8
@@ -33,6 +35,7 @@ task btracec(type: JavaExec) {
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
 jmhClasses.dependsOn btracec
+compileJmhJava.dependsOn btracec
 
 jmhJar {
   include 'META-INF/BenchmarkList'
@@ -53,8 +56,9 @@ jmh {
   fork = 2
   jvm = java8.get().toString()
   duplicateClassesStrategy = DuplicatesStrategy.WARN
-  def agentJar = project.buildDir.toPath().resolve('../../../btrace-dist/build/resources/main/' + project.version + '/libs/btrace-agent-' + project.version + '.jar').normalize()
-  def agent = "-javaagent:${agentJar}=stdout=true,noServer=true,debug=true,script=${project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass')}"
+  def agentJarPath = project.buildDir.toPath().resolve('../../../btrace-dist/build/resources/main/v' + project.version + '/libs/btrace-agent-' + project.version + '.jar').normalize()
+  def scriptPath = project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass').normalize()
+  def agent = "-javaagent:${agentJarPath}=stdout=true,noServer=true,debug=true,script=\'${scriptPath}\'"
   jvmArgsAppend = ["\"-Djmh.basedir=${project.buildDir.getParent()} -Dproject.version=${project.version} -Xmx128m ${agent.toString()}\""]
   includes = ['.*BTraceBench.*']
 }

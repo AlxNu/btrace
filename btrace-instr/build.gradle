@@ -39,7 +39,7 @@ task compileTestProbes {
         def compiler = loader.loadClass('org.openjdk.btrace.compiler.Compiler')
         def rtCp = sourceSets.main.runtimeClasspath //.collect { it.absolutePath }.join(':')
 
-        def args = ["-cp", rtCp.plus(files(buildDir.toPath().resolve("classes").resolve("java").resolve("test"), buildDir.toPath().resolve("classes").resolve("java").resolve("java11_dummy"))).getAsPath(), "-d", buildDir.toPath().resolve("classes")]
+        def args = ["-cp", rtCp.plus(files(buildDir.toPath().resolve("classes/java/test"), buildDir.toPath().resolve("classes/java/java11_dummy"))).getAsPath(), "-d", buildDir.toPath().resolve("classes")]
 
         def files = fileTree(dir: "src/test/btrace", include: '**/*.java', exclude: 'verifier/**/*.java').findAll {
             it != null
