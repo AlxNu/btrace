@@ -25,6 +25,7 @@
 package org.openjdk.btrace.instr;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,6 +38,9 @@ public class InstrumentorTest extends InstrumentorTestBase {
     try {
       Field f = RandomIntProvider.class.getDeclaredField("useBtraceEnter");
       f.setAccessible(true);
+      Field modifiersField = f.getClass().getDeclaredField("modifiers");
+      modifiersField.setAccessible(true);
+      modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
       f.setBoolean(null, false);
     } catch (Exception e) {
       e.printStackTrace();
