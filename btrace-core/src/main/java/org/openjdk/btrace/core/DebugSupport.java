@@ -30,7 +30,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.slf4j.Logger;
-import org.slf4j.impl.SimpleLogger;
 
 /**
  * Centralized support for logging various debug information.
@@ -45,10 +44,10 @@ public final class DebugSupport {
         System.getProperty("org.slf4j.simpleLogger.log.org.openjdk.btrace", "info");
     System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", debug ? "debug" : defaultLevel);
     try {
-      Method mthd = SimpleLogger.class.getDeclaredMethod("init");
+      Method mthd = Class.forName("org.slf4j.impl.SimpleLogger").getDeclaredMethod("init");
       mthd.setAccessible(true);
       mthd.invoke(null);
-    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | SecurityException | ClassNotFoundException e) {
       System.err.println("[btrace] Unable to reload logger config");
     }
     if (logger != null) {
