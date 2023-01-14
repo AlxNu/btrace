@@ -556,11 +556,10 @@ public final class Main {
 
   private static void processClasspaths(String libs) {
     URL agentJar = Main.class.getResource("Main.class");
-    String bootPath = agentJar.toString().replace("jar:file:", "");
-    int idx = bootPath.indexOf("btrace-agent.jar");
-    if (idx > -1) {
-      bootPath = bootPath.substring(0, idx) + "btrace-boot.jar";
-    }
+    String bootPath = agentJar.toString()
+        .replaceFirst("^(jar:)?(file:)?", "")
+        .replaceFirst("\\.jar!.*$", ".jar")
+        .replaceFirst("btrace-agent([^/]*\\.jar)$", "btrace-boot$1");
     String bootClassPath = argMap.get(BOOT_CLASS_PATH);
     if (bootClassPath == null) {
       bootClassPath = bootPath;
@@ -583,7 +582,7 @@ public final class Main {
         } else {
           if (f.isFile() && f.getName().toLowerCase().endsWith(".jar")) {
             JarFile jf = asJarFile(f);
-            log.debug("Adding jar: {}", jf);
+            log.debug("Adding jar: {}", f);
             inst.appendToBootstrapClassLoaderSearch(jf);
           } else {
             log.debug("ignoring boot classpath element '{}' - only jar files allowed", path);
