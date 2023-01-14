@@ -25,6 +25,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jctools/jctools-core
     implementation(group: 'org.jctools', name: 'jctools-core', version: '4.0.1')
 
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    testImplementation  (group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36')
+
     testImplementation project(':btrace-client')
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.1")
     testImplementation group: 'org.ow2.asm', name: 'asm-util', version: "${rootProject.asmVersion}"
@@ -33,11 +36,11 @@ dependencies {
 task compileTestProbes {
     dependsOn compileTestJava
     doLast {
-        def path = project(':btrace-instr').sourceSets.main.runtimeClasspath
+        def path = project(':btrace-instr').sourceSets.test.runtimeClasspath
 
         def loader = new URLClassLoader(path.collect { f -> f.toURL() } as URL[])
         def compiler = loader.loadClass('org.openjdk.btrace.compiler.Compiler')
-        def rtCp = sourceSets.main.runtimeClasspath //.collect { it.absolutePath }.join(':')
+        def rtCp = sourceSets.test.runtimeClasspath
 
         def args = ["-cp", rtCp.plus(files(buildDir.toPath().resolve("classes/java/test"), buildDir.toPath().resolve("classes/java/java11_dummy"))).getAsPath(), "-d", buildDir.toPath().resolve("classes")]
 
@@ -54,7 +57,6 @@ task compileTestProbes {
 test {
     dependsOn cleanTest
     inputs.files compileTestProbes.outputs
-    //inputs.files buildDTrace.outputs
     testLogging.showStandardStreams = true
 
     def props = new Properties()
@@ -62,6 +64,6 @@ test {
     if (props.getProperty("JAVA_VERSION")?.contains("1.8")) {
         jvmArgs "-Dproject.version=${project.version}"
     } else {
-        jvmArgs '-XX:+IgnoreUnrecognizedVMOptions', '--add-opens', 'java.base/java.lang=ALL-UNNAMED', '--add-opens', 'java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports', 'java.base/jdk.internal.reflect=ALL-UNNAMED', "-Dproject.version=${project.version}"
+        jvmArgs '-XX:+IgnoreUnrecognizedVMOptions', '--add-opens:java.base/java.lang=ALL-UNNAMED', '--add-opens:java.base/jdk.internal.reflect=ALL-UNNAMED', '--add-exports:java.base/jdk.internal.reflect=ALL-UNNAMED', "-Dproject.version=${project.version}"
     }
 }
