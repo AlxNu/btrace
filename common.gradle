@@ -34,12 +34,22 @@ project.ext.setProperty('compiler11', javaToolchains.compilerFor {
     vendor.set(JvmVendorSpec.ADOPTIUM)
 })
 project.ext.setProperty('home11', compiler11.map { it.metadata.installationPath })
+project.ext.setProperty('launcher11', javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(11))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('java11', launcher11.map { it.executablePath })
 
 project.ext.setProperty('compiler17', javaToolchains.compilerFor {
     languageVersion.set(JavaLanguageVersion.of(17))
     vendor.set(JvmVendorSpec.ADOPTIUM)
 })
 project.ext.setProperty('home17', compiler17.map { it.metadata.installationPath })
+project.ext.setProperty('launcher17', javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(17))
+    vendor.set(JvmVendorSpec.ADOPTIUM)
+})
+project.ext.setProperty('java17', launcher17.map { it.executablePath })
 
 java {
     toolchain {
@@ -66,6 +76,7 @@ String mavenArtifactId = name
 
 javadoc {
     javadocTool = javadoctool8
+    options.addStringOption('locale', 'en_US')
     options.addStringOption('Xdoclint:all,-missing', '-quiet')
     failOnError true
 }
