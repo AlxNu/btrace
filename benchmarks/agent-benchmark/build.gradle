@@ -5,28 +5,34 @@ plugins {
 
 description 'A JMH benchmark to assert the overhead imposed by various types of BTrace instrumentation.'
 
+configurations {
+  btracec
+}
+
 dependencies {
-  implementation project(path: ":btrace-dist", configuration: "shadow")
-  implementation project(":btrace-compiler")
+  btracec tasks.getByPath(':btrace-dist:clientJar').outputs.getFiles()
+
+  // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+  btracec  (group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36')
+
+  jmhRuntimeOnly tasks.getByPath(':btrace-dist:agentJar').outputs.getFiles()
+  jmhRuntimeOnly tasks.getByPath(':btrace-dist:bootJar').outputs.getFiles()
+  jmh project(":btrace-core")
   jmh project(":btrace-instr")
   jmh project(":btrace-runtime")
   jmh project(":btrace-statsd")
   jmh("org.openjdk.jmh:jmh-core:1.36")
   jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
 }
-configurations.implementation.canBeResolved = true  // TODO : Fix me !!!
-
-sourceCompatibility = '8'
-targetCompatibility = '8'
 
 task btracec(type: JavaExec) {
-  javaLauncher = launcher8
+  javaLauncher = launcher17
   group 'Build'
   inputs.files 'src/main/resources/scripts'
   outputs.dir buildDir.toPath().resolve("classes/java/main")
 
   environment('BTRACE_HOME', "$projectDir")
-  classpath configurations.implementation
+  classpath configurations.btracec
   mainClass = "org.openjdk.btrace.compiler.Compiler"
   args '-d'
   args "${buildDir}/classes/java/main/"
@@ -34,7 +40,6 @@ task btracec(type: JavaExec) {
   args 'btclass'
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
-jmhClasses.dependsOn btracec
 compileJmhJava.dependsOn btracec
 
 jmhJar {
@@ -54,11 +59,14 @@ jmh {
   warmupIterations = 5
   iterations = 10
   fork = 2
-  jvm = java8.get().toString()
+  jvm = java17.get().toString()
   duplicateClassesStrategy = DuplicatesStrategy.WARN
-  def agentJarPath = project.buildDir.toPath().resolve('../../../btrace-dist/build/resources/main/v' + project.version + '/libs/btrace-agent-' + project.version + '.jar').normalize()
-  def scriptPath = project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass').normalize()
+  def jmhBasedir = project.buildDir.getParentFile().toPath()
+  def agentJarPath = tasks.getByPath(':btrace-dist:agentJar').outputs.getFiles().getSingleFile()
+  def scriptPath = project.buildDir.toPath().resolve('classes/java/main/TraceScript.btclass')
   def agent = "-javaagent:${agentJarPath}=stdout=true,noServer=true,debug=true,script=\'${scriptPath}\'"
-  jvmArgsAppend = ["\"-Djmh.basedir=${project.buildDir.getParent()} -Dproject.version=${project.version} -Xmx128m ${agent.toString()}\""]
+  jvmArgsAppend = ["\"-Djmh.basedir=${jmhBasedir} -Dproject.version=${project.version} -Xmx128m ${agent.toString()}\""]
+  resultFormat = 'json'
+  resultsFile = file("${project.buildDir}/results/jmh/results.json")
   includes = ['.*BTraceBench.*']
 }
