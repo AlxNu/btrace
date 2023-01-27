@@ -556,10 +556,8 @@ public final class Main {
 
   private static void processClasspaths(String libs) {
     URL agentJar = Main.class.getResource("Main.class");
-    String bootPath = agentJar.toString()
-        .replaceFirst("^(jar:)?(file:)?", "")
-        .replaceFirst("\\.jar!.*$", ".jar")
-        .replaceFirst("btrace-agent([^/]*\\.jar)$", "btrace-boot$1");
+    String bootPath = agentJar.toString().replaceFirst("^(jar:)?(file:)?", "").replaceFirst("\\.jar!.*$", ".jar");
+    bootPath = bootPath.replaceFirst("btrace-agent([^/]*\\.jar)$", "btrace-boot$1");
     String bootClassPath = argMap.get(BOOT_CLASS_PATH);
     if (bootClassPath == null) {
       bootClassPath = bootPath;

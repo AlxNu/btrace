@@ -116,3 +116,13 @@ test {
         events "passed", "skipped", "failed"
     }
 }
+
+ext.pathAgentpathStyle = { input ->
+    // Quote backslashs and spaces with a backslash
+    input.toString().replaceAll("[ \\\\]", "\\\\\$0")
+}
+
+ext.pathDoubleQuotedStyle = { input ->
+    // Quote whole string by double quotes
+    '"' + input + '"'
+}

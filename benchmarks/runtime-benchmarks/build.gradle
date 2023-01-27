@@ -1,6 +1,6 @@
 plugins {
   id 'java'
-  id("me.champeau.jmh") version "0.6.8"
+  alias(libs.plugins.jmh)
 }
 
 description 'A JMH benchmark to assert the overhead imposed by various types of BTrace instrumentation.'
@@ -8,23 +8,21 @@ description 'A JMH benchmark to assert the overhead imposed by various types of 
 dependencies {
   implementation tasks.getByPath(':btrace-dist:clientJar').outputs.getFiles()
 
-  jmh("org.openjdk.jmh:jmh-core:1.36")
-  jmh("org.openjdk.jmh:jmh-generator-annprocess:1.36")
+  jmh libs.jmh
+  jmh libs.jmh.annprocess
 }
 
 task btracec(type: JavaExec) {
   javaLauncher = launcher17
   group 'Build'
   inputs.files 'src/main/resources/scripts'
-  outputs.dir "${buildDir}/classes/java/main"
+  outputs.dir buildDir.toPath().resolve("classes/java/main")
 
-  environment('BTRACE_HOME', "$projectDir")
+  environment('BTRACE_HOME', projectDir)
   classpath configurations.compileClasspath
   mainClass = "org.openjdk.btrace.compiler.Compiler"
-  args '-d'
-  args "${buildDir}/classes/java/main/"
-  args '-packext'
-  args 'btclass'
+  args '-d', buildDir.toPath().resolve("classes/java/main")
+  args '-packext', 'btclass'
   args fileTree(dir: "src/jmh/btrace", include: 'TraceScript.java')
 }
 compileJmhJava.dependsOn btracec
@@ -50,10 +48,9 @@ jmhJar {
 jmh {
   jvm = java17.get().toString()
   duplicateClassesStrategy = DuplicatesStrategy.WARN
-  jvmArgsAppend = ["-Djmh.basedir=${project.buildDir.getParent()}", "-Dproject.version=${project.version}"]
+  jvmArgsAppend = ["-Djmh.basedir=${pathDoubleQuotedStyle(project.buildDir.getParent())}", "-Dproject.version=${project.version}"]
   resultFormat = 'json'
-  resultsFile = file("${project.buildDir}/results/jmh/results.json")
+  resultsFile = file(project.buildDir.toPath().resolve("results/jmh/results.json"))
   includes = ['org.openjdk.btrace.bench.ClassFilterBenchmark']
   verbosity = 'EXTRA'
 }
-

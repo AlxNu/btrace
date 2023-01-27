@@ -1,10 +1,10 @@
 plugins {
+    id 'java'
+    id 'signing'
     id 'maven-publish'
-    id "com.github.johnrengelman.shadow" version "7.1.2"
-    id "com.netflix.nebula.ospackage" version "11.0.0"
-    id "java"
-    id "io.sdkman.vendors" version "3.0.0"
-    id "signing"
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.ospackage)
+    alias(libs.plugins.sdkman.vendors)
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
@@ -41,44 +41,9 @@ sourceSets {
         output.resourcesDir = file("${distTarget}")
     }
 }
+
 artifacts {
     archives file("${distTarget}/libs/btrace-agent.jar")
-}
-
-task agentJar(type: ShadowJar) {
-    group 'Build'
-    archiveBaseName = 'btrace-agent'
-    archiveVersion = null
-    archiveClassifier = null
-    destinationDirectory = libsDir
-
-    manifest {
-        attributes(
-                "Premain-Class": "org.openjdk.btrace.agent.Main",
-                "Agent-Class": "org.openjdk.btrace.agent.Main",
-                "Can-Redefine-Classes": true,
-                "Can-Retransform-Classes": true,
-                "Boot-Class-Path": "btrace-boot.jar"
-        )
-    }
-
-    include {
-        if (it.directory) {
-            return true
-        }
-        if (it.path.endsWith('.jar')) {
-            return true
-        }
-        return it.path.startsWith('org/openjdk/btrace/agent/') ||
-               it.path.startsWith('org/openjdk/btrace/instr/') ||
-               // include the messages resource bundle and class in the agent jar (bootstrap can't load resources)
-               it.path == 'org/openjdk/btrace/core/Messages.class' ||
-               it.path == 'org/openjdk/btrace/core/messages.properties'
-    }
-
-    configurations = [project.configurations.artifact]
-    relocate 'org.jctools', 'org.openjdk.btrace.libs.org.jctools'
-    relocate 'org.objectweb.asm', 'org.openjdk.btrace.libs.org.objectweb.asm'
 }
 
 task bootJar(type: ShadowJar) {
@@ -97,7 +62,9 @@ task bootJar(type: ShadowJar) {
             return true
         }
         if (it.path.startsWith('org/openjdk/btrace/core/')) {
-            if (it.path == 'org/openjdk/btrace/core/Messages.class' || it.path == 'org/openjdk/btrace/core/messages.properties') {
+            if (it.path == 'org/openjdk/btrace/core/DebugSupport.class' ||
+                it.path == 'org/openjdk/btrace/core/Messages.class' ||
+                it.path == 'org/openjdk/btrace/core/messages.properties') {
                 // messages resource bundle&class are hoisted to agent and client jars
                 return false
             }
@@ -121,6 +88,44 @@ task bootJar(type: ShadowJar) {
                 it.path.startsWith('org/openjdk/btrace/runtime/') ||
                 it.path.startsWith('org/openjdk/btrace/services/') ||
                 it.path.startsWith('org/openjdk/btrace/statsd/')
+    }
+
+    configurations = [project.configurations.artifact]
+    relocate 'org.jctools', 'org.openjdk.btrace.libs.org.jctools'
+    relocate 'org.objectweb.asm', 'org.openjdk.btrace.libs.org.objectweb.asm'
+    relocate 'org.slf4j', 'org.openjdk.btrace.libs.org.slf4j'
+}
+
+task agentJar(type: ShadowJar) {
+    group 'Build'
+    archiveBaseName = 'btrace-agent'
+    archiveVersion = null
+    archiveClassifier = null
+    destinationDirectory = libsDir
+
+    manifest {
+        attributes(
+                "Premain-Class": "org.openjdk.btrace.agent.Main",
+                "Agent-Class": "org.openjdk.btrace.agent.Main",
+                "Can-Redefine-Classes": true,
+                "Can-Retransform-Classes": true,
+                "Boot-Class-Path": tasks.getByName('bootJar').archiveFileName
+        )
+    }
+
+    include {
+        if (it.directory) {
+            return true
+        }
+        if (it.path.endsWith('.jar')) {
+            return true
+        }
+        return it.path.startsWith('org/openjdk/btrace/agent/') ||
+               it.path.startsWith('org/openjdk/btrace/instr/') ||
+               it.path == 'org/openjdk/btrace/core/DebugSupport.class' ||
+               // include the messages resource bundle and class in the agent jar (bootstrap can't load resources)
+               it.path == 'org/openjdk/btrace/core/Messages.class' ||
+               it.path == 'org/openjdk/btrace/core/messages.properties'
     }
 
     configurations = [project.configurations.artifact]
